@@ -23,7 +23,7 @@ public class DivideMergeSort {
 
 
     public static final int SIZE = 5000000;
-    public static final int THRESHOLD = 100;
+    public static final int THRESHOLD = 16;
 
     public static void main(String[] args) {
 //        createData();
@@ -33,8 +33,14 @@ public class DivideMergeSort {
         long t1 = System.currentTimeMillis();
         int[] sortData1 = divideSort(data);
         long t2 = System.currentTimeMillis();
+        System.out.println(data[3]);
+        long t3 = System.currentTimeMillis();
+        Arrays.sort(data);
+        long t4 = System.currentTimeMillis();
 //        System.out.println("插入排序耗时: " + (t1 - t0));
         System.out.println("分治排序耗时: " + (t2 - t1));
+        System.out.println("分治排序耗1时: " + (t4 - t3));
+
     }
 
     /**
