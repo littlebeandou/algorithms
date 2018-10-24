@@ -19,7 +19,7 @@ import java.util.Random;
  *
  * 从测试结果可以看出, 分治排序的时间复杂度小于O(n), 为O(log(n))
  */
-public class MergeSort {
+public class DivideMergeSort {
 
 
     public static final int SIZE = 5000000;
@@ -29,9 +29,9 @@ public class MergeSort {
 //        createData();
         int[] data = readData();
 //        long t0 = System.currentTimeMillis();
-//        int[] sortData = MergeSort.insertSort(data);
+//        int[] sortData = insertSort(data);
         long t1 = System.currentTimeMillis();
-        int[] sortData1 = MergeSort.divideSort(data);
+        int[] sortData1 = divideSort(data);
         long t2 = System.currentTimeMillis();
 //        System.out.println("插入排序耗时: " + (t1 - t0));
         System.out.println("分治排序耗时: " + (t2 - t1));
