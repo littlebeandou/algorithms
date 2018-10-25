@@ -54,26 +54,32 @@ public class MaxSubsequence {
 
     /**
      * 利用分治策略实现最大连续和的子序列查找
+     *
      * @param src
-     * @param leftIndex, 数组的左索引, 必须大于0
+     * @param leftIndex,  数组的左索引, 必须大于0
      * @param rightIndex, 数组的右索引, 必须小于数组的长度
      * @return
      */
-    public static Map<String, Object> divideMergeMethod(int[] src, int leftIndex, int rightIndex){
+    public static Map<String, Object> divideMergeMethod(int[] src, int leftIndex, int rightIndex) {
         if (src == null || src.length == 0) {
             return null;
         }
 
-
         int len = src.length;
+        if (leftIndex < 0 || rightIndex >= len || leftIndex >= rightIndex) {
+            return null;
+        }
+
         if (len < THRESHOLD)
             return exhaustiveMethod(src);
-        int midIndex = (leftIndex + rightIndex)/2;
+
+        int midIndex = (leftIndex + rightIndex + 1) / 2;
         int[] leftData = Arrays.copyOfRange(src, leftIndex, midIndex);
-        int[] rightData = Arrays.copyOfRange(src, midIndex, rightIndex);
+        int[] rightData = Arrays.copyOfRange(src, midIndex, rightIndex + 1);
 
         return null;
     }
+
     public static void main(String[] args) {
         int[] arr = {4, -3, 5, -2, -1, 2, 1, -2};
         Map<String, Object> map = exhaustiveMethod(arr);
