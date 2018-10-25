@@ -15,6 +15,8 @@ import java.util.Set;
  */
 public class MaxSubsequence {
 
+    private static final int THRESHOLD = 10;
+
 
     /**
      * 普通的穷举方法
@@ -32,23 +34,14 @@ public class MaxSubsequence {
         int endIndex = 0;
 
         for (int i = 0; i < len; i++) {
-            long maxSumI = src[i];
             long sumI = src[i];
-            int startIndexI = i;
-            int endIndexI = i;
-
             for (int j = i + 1; j < len; j++) {
                 sumI += src[j];
-                if (sumI > maxSumI){
-                    maxSumI = sumI;
-                    endIndexI = j;
+                if (sumI > maxSum) {
+                    maxSum = sumI;
+                    startIndex = i;
+                    endIndex = j;
                 }
-            }
-
-            if (maxSumI > maxSum){
-                maxSum = maxSumI;
-                startIndex = startIndexI;
-                endIndex = endIndexI;
             }
         }
 
@@ -59,6 +52,28 @@ public class MaxSubsequence {
         return map;
     }
 
+    /**
+     * 利用分治策略实现最大连续和的子序列查找
+     * @param src
+     * @param leftIndex, 数组的左索引, 必须大于0
+     * @param rightIndex, 数组的右索引, 必须小于数组的长度
+     * @return
+     */
+    public static Map<String, Object> divideMergeMethod(int[] src, int leftIndex, int rightIndex){
+        if (src == null || src.length == 0) {
+            return null;
+        }
+
+
+        int len = src.length;
+        if (len < THRESHOLD)
+            return exhaustiveMethod(src);
+        int midIndex = (leftIndex + rightIndex)/2;
+        int[] leftData = Arrays.copyOfRange(src, leftIndex, midIndex);
+        int[] rightData = Arrays.copyOfRange(src, midIndex, rightIndex);
+
+        return null;
+    }
     public static void main(String[] args) {
         int[] arr = {4, -3, 5, -2, -1, 2, 1, -2};
         Map<String, Object> map = exhaustiveMethod(arr);
