@@ -13,7 +13,7 @@ import java.util.Random;
  */
 public class MaxSubsequence {
 
-    private static final int THRESHOLD = 20;
+    private static final int THRESHOLD = 100;
 
 
     /**
@@ -82,11 +82,11 @@ public class MaxSubsequence {
             return exhaustiveMethod(src);
 
 
-        int midIndex = (leftIndex + rightIndex + 1) / 2;
+        int midIndex = (leftIndex + rightIndex) / 2;
         int[] left = Arrays.copyOfRange(src, leftIndex, midIndex + 1);
         int[] right = Arrays.copyOfRange(src, midIndex + 1, rightIndex + 1);
-        int[] leftIndexs = divideMergeMethod(left, 0, midIndex - leftIndex);
-        int[] rightIndexs = divideMergeMethod(right, 0, rightIndex - midIndex - 1);
+        int[] leftIndexs = divideMergeMethod(left, 0, left.length - 1);
+        int[] rightIndexs = divideMergeMethod(right, 0, right.length - 1);
 
         return mergeLeftAndRight(left, leftIndexs, right, rightIndexs);
     }
@@ -95,34 +95,91 @@ public class MaxSubsequence {
         int leftSum = sum(left, leftIndexs[0], leftIndexs[1]);
         int rightSum = sum(right, rightIndexs[0], rightIndexs[1]);
         int leftMidSum = 0;
-        if (leftIndexs[1] < left.length - 1)
-            leftMidSum = sum(left, leftIndexs[1] + 1, left.length - 1);
-        int rightMidSum = 0;
-        if (rightIndexs[0] > 0)
-            rightMidSum = sum(right, 0, rightIndexs[0] - 1);
-        int midSum = leftMidSum + rightMidSum;
-        if (midSum > 0) {
-            return new int[]{leftIndexs[0], left.length + rightIndexs[1]};
+        int leftMidMaxSum = 0;
+        int leftMidIndex = 0;
+        for (int i = left.length - 1; i >= 0; i--) {
+            leftMidSum += left[i];
+            if (leftMidSum > leftMidMaxSum) {
+                leftMidMaxSum = leftMidSum;
+                leftMidIndex = i;
+            }
         }
+
+        int rightMidSum = 0;
+        int rightMidMaxSum = 0;
+        int rightMidIndex = 0;
+        for (int i = 0; i < right.length; i++) {
+            rightMidSum += right[i];
+            if (rightMidSum > rightMidMaxSum) {
+                rightMidMaxSum = rightMidSum;
+                rightMidIndex = i;
+            }
+        }
+
+        int midSum = leftMidMaxSum + rightMidMaxSum;
+
         int leftIndex = leftIndexs[0];
         int rightIndex = leftIndexs[1];
         if (rightSum > leftSum) {
             leftIndex = left.length + rightIndexs[0];
             rightIndex = left.length + rightIndexs[1];
+            if (midSum > rightSum) {
+                leftIndex = leftMidIndex;
+                rightIndex = rightMidIndex + left.length;
+            }
+        } else {
+            if (midSum > leftSum) {
+                leftIndex = leftMidIndex;
+                rightIndex = rightMidIndex + left.length;
+            }
         }
+
         return new int[]{leftIndex, rightIndex};
     }
 
     public static int sum(int[] src, int leftIndex, int rightIndex) {
         int sum = 0;
-        for (int i = leftIndex; i < rightIndex; i++) {
+        for (int i = leftIndex; i <= rightIndex; i++) {
             sum += src[i];
         }
         return sum;
     }
 
+    /**
+     * 动态规划法, 时间复杂度为O(N)
+     *
+     * @param data
+     * @return
+     */
+    public static int dynamicMethod(int[] data) {
+        int maxSum = 0;
+        int thisSum = 0;
+        int leftIndex = 0;
+        int rightIndex = 0;
+        int tempIndex = 0;
+        int flip = 0;
+        for (int i = 0; i < data.length; i++) {
+            thisSum += data[i];
+            if (thisSum > maxSum) {
+                maxSum = thisSum;
+                rightIndex = i;
+                if (flip == 1){
+                    leftIndex = tempIndex;
+                    flip = 0;
+                }
+            } else if (thisSum < 0) {
+                thisSum = 0;
+                flip = 1;
+                tempIndex = i + 1;
+
+            }
+        }
+        System.out.println(leftIndex + " : " +rightIndex);
+        return maxSum;
+    }
+
     public static void main(String[] args) {
-        int size = 1000;
+        int size = 100000000;
         int[] arr = new int[size];
         Random random = new Random();
         for (int i = 0; i < size; i++) {
@@ -131,21 +188,29 @@ public class MaxSubsequence {
             if (i1 == 1)
                 arr[i] = arr[i] * (-1);
         }
-        long t1 = System.currentTimeMillis();
+        /*long t1 = System.currentTimeMillis();
         int[] ints = exhaustiveMethod(arr);
         long t2 = System.currentTimeMillis();
         for (int anInt : ints) {
             System.out.println("anInt = " + anInt);
-        }
+        }*/
         long t3 = System.currentTimeMillis();
         int[] ints1 = divideMergeMethod(arr);
         long t4 = System.currentTimeMillis();
         for (int i : ints1) {
             System.out.println("i = " + i);
         }
+        System.out.println("sum(arr, ints1[0], ints1[1]) = " + sum(arr, ints1[0], ints1[1]));
+
+        long t5 = System.currentTimeMillis();
+        int sum = dynamicMethod(arr);
+        long t6 = System.currentTimeMillis();
 
         System.out.println("(t4-t3) = " + (t4 - t3));
-        System.out.println("(t2-t1) = " + (t2 - t1));
+        System.out.println("(t6-t5) = " + (t6 - t5));
+        System.out.println("sum = " + sum);
+
+//        System.out.println("(t2-t1) = " + (t2 - t1));
     }
 
 }
