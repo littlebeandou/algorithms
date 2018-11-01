@@ -147,6 +147,8 @@ public class MaxSubsequence {
 
     /**
      * 动态规划法, 时间复杂度为O(N)
+     * 联机算法仅需要常量空间并以线性时间运行,
+     * 联机算法只对数据进行一次扫描, 处理过的数据不需要再被记忆
      *
      * @param data
      * @return

@@ -22,12 +22,12 @@ import java.util.Random;
 public class DivideMergeSort {
 
 
-    public static final int SIZE = 5000000;
+    public static final int SIZE = 50000000;
     public static final int THRESHOLD = 16;
 
     public static void main(String[] args) {
-//        createData();
-        int[] data = readData();
+        createData();
+        /*int[] data = readData();
 //        long t0 = System.currentTimeMillis();
 //        int[] sortData = insertSort(data);
         long t1 = System.currentTimeMillis();
@@ -39,7 +39,7 @@ public class DivideMergeSort {
         long t4 = System.currentTimeMillis();
 //        System.out.println("插入排序耗时: " + (t1 - t0));
         System.out.println("分治排序耗时: " + (t2 - t1));
-        System.out.println("分治排序耗1时: " + (t4 - t3));
+        System.out.println("分治排序耗1时: " + (t4 - t3));*/
 
     }
 
