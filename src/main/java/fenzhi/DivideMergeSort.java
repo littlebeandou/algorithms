@@ -1,8 +1,7 @@
 package fenzhi;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author xiaoqiang
@@ -13,23 +12,49 @@ import java.util.Random;
  * 插入排序耗时:43.88s
  * 分治排序耗时(分治排序阈值为100):0.14s
  * 分治排序耗时(分治排序阈值为1000):0.24s
+ * 快速排序耗时: 0.245s
  * ----------------------------------------------
  * 随机生成500万个随机数, 采用插入排序和分支排序对其进行排序
  * 分治排序耗时(分治排序阈值为100):0.55s
  * 分治排序耗时(分治排序阈值为1000):0.85s
- *
+ * 快速排序耗时: 0.912s
+ * <p>
  * 从测试结果可以看出, 分治排序的时间复杂度小于O(n), 为O(log(n))
  */
 public class DivideMergeSort {
 
 
-    public static final int SIZE = 50000000;
+    public static final int SIZE = 50;
     public static final int THRESHOLD = 16;
 
     public static void main(String[] args) {
-        createData();
-        /*int[] data = readData();
-//        long t0 = System.currentTimeMillis();
+//        createData();
+        int[] data = readData();
+        int[] data1 = readData();
+        /*for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i] + " ");
+        }
+        System.out.println();*/
+        long t0 = System.currentTimeMillis();
+        fastSort(data, 0, data.length - 1);
+        long t1 = System.currentTimeMillis();
+//        insertSort(data1, 0, data1.length - 1);
+        baseSort(data1);
+        long t2 = System.currentTimeMillis();
+
+        System.out.println("t1-t0 = " + (t1 - t0));
+        System.out.println("t2-t1 = " + (t2 - t1));
+        for (int i = 0; i < data1.length; i++) {
+            System.out.print(data1[i] + " ");
+        }
+        System.out.println();
+
+        checkSort(data);
+        checkSort(data1);
+        System.out.println(data[0]);
+        System.out.println(data[data.length - 1]);
+
+        /*long t0 = System.currentTimeMillis();
 //        int[] sortData = insertSort(data);
         long t1 = System.currentTimeMillis();
         int[] sortData1 = divideSort(data);
@@ -44,6 +69,22 @@ public class DivideMergeSort {
 
     }
 
+    private static void checkSort(int[] src) {
+        boolean flag = true;
+        if (src != null && src.length > 1) {
+            for (int i = 1; i < src.length; i++) {
+                if (src[i] < src[i - 1]) {
+                    flag = false;
+                }
+            }
+        }
+        if (flag) {
+            System.out.println("sorted!");
+        } else {
+            System.out.println("not sorted!");
+        }
+    }
+
     /**
      * 随机生成100万个范围为0~1000的随机数, 并将其保存到txt文档中
      */
@@ -52,7 +93,6 @@ public class DivideMergeSort {
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(file));
-            Random random = new Random();
             for (int i = 0; i < SIZE; i++) {
                 int num = random.nextInt(10000);
                 bufferedWriter.write(new String(num + ""));
@@ -82,9 +122,9 @@ public class DivideMergeSort {
      */
     public static int[] readData() {
         File file = new File("F:\\data.txt");
-        if (!file.exists()) {
-            createData();
-        }
+//        if (!file.exists()) {
+        createData();
+//        }
         int[] datas = new int[SIZE];
         BufferedReader reader = null;
         int i = 0;
@@ -141,6 +181,212 @@ public class DivideMergeSort {
             }
         }
         return src;
+    }
+
+    private static Random random = new Random();
+
+    public static void fastSort(int[] src, int start, int end) {
+        if (src == null || src.length <= 1 || start < 0 || end > src.length - 1 || end <= start + 1) {
+            return;
+        }
+
+        int len = end - start + 1;
+        if (len < 400) {
+            insertSort(src, start, end);
+            return;
+        }
+
+        //计算用于划分的基准值,从数组中取五个不同的值,取中间数作为基准值
+        int size = 15;
+        List<Integer> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            int nextInt = random.nextInt(len);
+            list.add(src[start + nextInt]);
+        }
+
+        Collections.sort(list);
+        int base = list.get(size >> 1);
+//        System.out.println("base = " + base);
+
+        int mid = start;
+        int endIndex = end;
+        int count = 0;
+        for (int i = start; i < end + 1; i++) {
+
+            if (src[i] > base) {
+                int temp = src[i];
+                boolean flag = false;
+                for (int j = endIndex; j > i; j--) {
+                    endIndex--;
+                    if (src[j] <= base) {
+                        //找到<=base的数,将两者进行调换,mid下标之前(包含mid)的元素都小于等于base
+                        mid = i;
+                        src[i] = src[j];
+                        src[j] = temp;
+                        flag = true;
+                        count++;
+                        break;
+                    }
+                }
+                //如果找不到需要调换的元素,说明已经完成调换了,跳出整个循环
+                if (!flag) {
+                    break;
+                }
+
+            } else {
+                mid = i;
+            }
+        }
+//        System.out.println("count = " + count);
+        if (count < (len >> 3)) {
+//            System.out.println("len1 = " + len);
+            insertSort(src, start, mid);
+            insertSort(src, mid + 1, end);
+        } else {
+//            System.out.println("len2 = " + len);
+            fastSort(src, start, mid);
+            fastSort(src, mid + 1, end);
+        }
+
+    }
+
+    private static void insertSort(int[] src, int start, int end) {
+        if (src == null || src.length <= 1 || start < 0 || end >= src.length || end <= start + 1) {
+            return;
+        }
+        for (int i = start + 1; i <= end; i++) {
+            int startIndex = i;
+            for (int j = start; j < i; j++) {
+                if (src[i] < src[j]) {
+                    startIndex = j;
+                    break;
+                }
+            }
+            if (startIndex < i) {
+                int temp = src[i];
+                for (int k = i; k > startIndex; k--) {
+                    src[k] = src[k - 1];
+                }
+                src[startIndex] = temp;
+            }
+        }
+    }
+
+    /**
+     * 基数排序
+     */
+    public static void baseSort(int[] src) {
+        int max = src[0];
+        for (int i = 0; i < src.length; i++) {
+            if (src[i] > max) {
+                max = src[i];
+            }
+        }
+        int count = 0;
+        while (max > 0) {
+            max = max / 10;
+            count++;
+        }
+        for (int i = count; i >= 0; i--) {
+            baseSort(src, i);
+        }
+
+    }
+
+    /**
+     * 当position为0时,代表对各位进行排序,为1时代表对十位进行排序,以此类推
+     *
+     * @param src
+     * @param position
+     */
+    public static void baseSort(int[] src, int position) {
+        int length = src.length;
+        int capacity = length >> 4;
+        ArrayList<Integer> list0 = new ArrayList<>(capacity);
+        ArrayList<Integer> list1 = new ArrayList<>(capacity);
+        ArrayList<Integer> list2 = new ArrayList<>(capacity);
+        ArrayList<Integer> list3 = new ArrayList<>(capacity);
+        ArrayList<Integer> list4 = new ArrayList<>(capacity);
+        ArrayList<Integer> list5 = new ArrayList<>(capacity);
+        ArrayList<Integer> list6 = new ArrayList<>(capacity);
+        ArrayList<Integer> list7 = new ArrayList<>(capacity);
+        ArrayList<Integer> list8 = new ArrayList<>(capacity);
+        ArrayList<Integer> list9 = new ArrayList<>(capacity);
+        //todo 取余有待改进
+        int mod = (int) Math.pow(10, position);
+        for (int i = 0; i < length; i++) {
+            int num = src[i];
+            if (num % mod == 0) {
+                list0.add(num);
+            } else if (num % mod == 1) {
+                list1.add(num);
+            } else if (num % mod == 2) {
+                list2.add(num);
+            } else if (num % mod == 3) {
+                list3.add(num);
+            } else if (num % mod == 4) {
+                list4.add(num);
+            } else if (num % mod == 5) {
+                list5.add(num);
+            } else if (num % mod == 6) {
+                list6.add(num);
+            } else if (num % mod == 7) {
+                list7.add(num);
+            } else if (num % mod == 8) {
+                list8.add(num);
+            } else {
+                list9.add(num);
+            }
+        }
+        int size0 = list0.size();
+        int size1 = list1.size();
+        int size2 = list2.size();
+        int size3 = list3.size();
+        int size4 = list4.size();
+        int size5 = list5.size();
+        int size6 = list6.size();
+        int size7 = list7.size();
+        int size8 = list8.size();
+        int size9 = list9.size();
+        for (int i = 0; i < size0; i++) {
+            src[i] = list0.get(i);
+        }
+        for (int i = 0; i < size1; i++) {
+            src[size0 + i] = list1.get(i);
+        }
+        int size01 = size0 + size1;
+        for (int i = 0; i < size2; i++) {
+            src[size01 + i] = list2.get(i);
+        }
+        int size02 = size0 + size1 + size2;
+        for (int i = 0; i < size3; i++) {
+            src[size02 + i] = list3.get(i);
+        }
+        int size03 = size0 + size1 + size2 + size3;
+        for (int i = 0; i < size4; i++) {
+            src[size03 + i] = list4.get(i);
+        }
+        int size04 = size0 + size1 + size2 + size3 + size4;
+        for (int i = 0; i < size5; i++) {
+            src[size04 + i] = list5.get(i);
+        }
+        int size05 = size0 + size1 + size2 + size3 + size4 + size5;
+        for (int i = 0; i < size6; i++) {
+            src[size05 + i] = list6.get(i);
+        }
+        int size06 = size0 + size1 + size2 + size3 + size4 + size5 + size6;
+        for (int i = 0; i < size7; i++) {
+            src[size06 + i] = list7.get(i);
+        }
+        int size07 = size0 + size1 + size2 + size3 + size4 + size5 + size6 + size7;
+        for (int i = 0; i < size8; i++) {
+            src[size07 + i] = list8.get(i);
+        }
+        int size08 = size0 + size1 + size2 + size3 + size4 + size5 + size6 + size7 + size8;
+        for (int i = 0; i < size9; i++) {
+            src[size08 + i] = list9.get(i);
+        }
+        System.out.println();
     }
 
     /**
